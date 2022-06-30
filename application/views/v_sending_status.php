@@ -1,0 +1,202 @@
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-1">
+        <h3 class="h5 mb-0 text-gray-900"><i class="fa fa-list"></i> List Task Antrean</h3>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm"><i class="fas fa-angle-left fa-sm text-white-50"></i> Back</a>
+    </div>
+    <hr>
+    <?php echo $this->session->flashdata('message'); ?>
+    <div class="loader">
+        <center><img src="<?php echo base_url('assets/img/spinner/') . 'loading.gif' ?>" alt="" style="height: 40px; width:40px"></center>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-gray-500 py-3">
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" id="printlayout">
+                <table id="datatable" class="table table-striped table-sm table-hover text-truncate" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Kodebooking</th>
+                            <th>Task</th>
+                            <th>No Antrean</th>
+                            <th>Mulai</th>
+                            <th>Selesai</th>
+                            <th>Selisih</th>
+                            <th>Send To JKN</th>
+                            <th>Response</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $data = json_decode($list);
+                        // var_dump($list);
+                        if ($data->metadata->code == 200) {
+                            if ($data->response != null) {
+                                $no = 1;
+                                foreach ($data->response->list as $agt) : ?>
+                                    <tr class="text-xs">
+                                        <td><?php echo $no++ ?></td>
+                                        <td><?php echo $agt->KODE_BOOKING; ?></td>
+                                        <td><?php echo $agt->NAME; ?></td>
+                                        <td><?php echo $agt->INISIAL_ANTREAN . $agt->NO_ANTREAN; ?></td>
+                                        <td><?php echo date('H:i:s', strtotime($agt->START_DATE)); ?></td>
+                                        <td><?php echo date('H:i:s', strtotime($agt->END_DATE)); ?></td>
+                                        <td><?php echo date('i:s', (((strtotime($agt->END_DATE)  - strtotime($agt->START_DATE)) / 60) * 60)) ?></td>
+                                        <td><?php echo $agt->SEND_TO_JKN; ?></td>
+                                        <td><?php echo $agt->RESPONSE_MESSAGE; ?></td>
+                                        <td><a href="<?= base_url('antrean/getListTask/') . $agt->KODE_BOOKING; ?>" class="badge badge-primary">info</a></td>
+                                    </tr>
+                        <?php endforeach;
+                            }
+                        } ?>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>#</th>
+                            <th>Kodebooking</th>
+                            <th>Task</th>
+                            <th>No Antrean</th>
+                            <th>Mulai</th>
+                            <th>Selesai</th>
+                            <th>Selisih</th>
+                            <th>Send To JKN</th>
+                            <th>Response</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="sticky-footer bg-white">
+    <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Cahayasolusindo <?php echo Date('Y') ?></span>
+        </div>
+    </div>
+</footer>
+<!-- End of Footer -->
+
+</div>
+<!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Logout Modal-->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary" href="<?php echo base_url('auth/logout') ?>">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rs Register Web service Modal-->
+<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Register Webservice Account</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="<?php echo base_url('dashboard/registerWs') ?>" method="POST">
+                    <div class="form-group row">
+                        <label for="ws_ppk" class="col-sm-3 col-form-label">PPK</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="ws_ppk" name="ws_ppk" placeholder="PPK">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="ws_id" class="col-sm-3 col-form-label">ID RS</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="ws_user_id" id="ws_id" placeholder="ID Rumah Sakit">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="ws_name" class="col-sm-3 col-form-label">Nama RS</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="ws_name" id="ws_name" placeholder="Nama Rumah Sakit">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="ws_const_id" class="col-sm-3 col-form-label">Const ID</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="ws_const_id" id="ws_const_id" placeholder="Cons Id">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="ws_secreet_key" class="col-sm-3 col-form-label">Key</label>
+                        <div class="col-sm-9">
+                            <input type="password" suggested="current-password" class="form-control" name="ws_secreet_key" id="ws_secreet_key" placeholder="Password">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-sm-3"> </div>
+                        <div class="col-sm-9">
+                            <button class="btn btn-secondary mb-1 ml-1" type="close" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary mb-1 ml-1">Save</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap core JavaScript-->
+<script src="<?php echo base_url('assets'); ?>/vendor/jquery/jquery.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="<?php echo base_url('assets'); ?>/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Data Table -->
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/dataTables.buttons.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/buttons.flash.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="<?php echo base_url('assets'); ?>/js/sb-admin-2.min.js"></script>
+
+
+<script>
+    $(document).ready(function() {
+        $('#datatable').DataTable();
+        $('.loader').hide();
+    });
+</script>
+
+</body>
+
+</html>
