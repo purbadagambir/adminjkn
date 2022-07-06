@@ -114,6 +114,36 @@ class Emed
         return json_encode($result);
     }
 
+    public function selectAppointment()
+    {
+        $stmt = $this->dbh->query("SELECT A.KODE_BOOKING,A.APPOINTMENT_DATE,A.SOCIAL_NO,B.RM_NO,B.NAME AS PASIEN, JADWAL, REGISTERED,C.NAME AS DPJP,
+                                            ESTIMASI_DILAYANI,NOTE,SEQUENCE_NO,D.INISIAL_ANTRIAN||A.SEQUENCE_NO AS NO_ANTREAN,NO_REFERENSI,REGISTERED
+                                    FROM APPOINTMENTS A, V_PATIENTS B, DOCTORS C, BPJS_DPJP D
+                                    WHERE A.SOCIAL_NO=B.SOCIAL_NO(+) AND
+                                        A.DOCTOR_NO=C.CONTACT_NO AND
+                                        C.CONTACT_NO=D.CONTACT_NO AND
+                                        TRUNC(A.APPOINTMENT_DATE) = TRUNC(SYSDATE)");
+
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($row) > 0) {
+            $metadata['code'] = 200;
+            $metadata['message'] = 'Ok';
+            $result = array(
+                'metadata' => $metadata,
+                'list' => $row
+            );
+        } else {
+            $metadata['code'] = 201;
+            $metadata['message'] = 'No data Found';
+            $result = array(
+                'metadata' => $metadata,
+                'list' => 'No Data found'
+            );
+        }
+        return json_encode($result);
+    }
+
     public function doctorData()
     {
         $stmt = $this->dbh->query('SELECT contact_no,name

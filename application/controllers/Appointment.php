@@ -12,7 +12,8 @@ class Appointment extends CI_controller
     public function index()
     {
         $data['header'] = 'Appointment';
-        $data['list'] = $this->loadService(JKN_WS . 'antrean/kodeppk', 'GET', $this->requestHeader(), '');
+        //$data['list'] = $this->loadService(JKN_WS . 'antrean/kodeppk', 'GET', $this->requestHeader(), '');
+        $data['list'] = $this->dbemed->selectAppointment();
         $this->load->view('templates/header', $data);
         userRole();
         $this->load->view('v_appointment');

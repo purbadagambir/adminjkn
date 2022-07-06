@@ -33,7 +33,7 @@
                             <th>Antrean</th>
                             <th>Estimasi Pelayanan</th>
                             <th>Ref.</th>
-                            <th>JKN</th>
+                            <th>Reg.</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -48,17 +48,17 @@
                                     <?php if ($agt->state == 1) { ?>
                                         <tr class="text-truncate">
                                             <td><?php echo $no++ ?></td>
-                                            <td><?php echo $agt->kodebooking; ?></td>
-                                            <td><?php echo $agt->nopeserta; ?></td>
-                                            <td><?php echo $agt->norm; ?></td>
-                                            <td class="text-capitalize"><?php echo $agt->namadokter; ?></td>
-                                            <td class="text-truncate"><?php echo $agt->jampraktek; ?></td>
-                                            <td><?php echo $agt->nomorantrean; ?></td>
-                                            <td class="text-truncate"><?php echo date('d-m-Y H:i', $agt->estimasidilayani); ?></td>
-                                            <td><?php echo $agt->nomorreferensi ?></td>
-                                            <td><?php echo $agt->send_to_jkn; ?></td>
-                                            <?php if ($agt->send_to_jkn == 'N') { ?>
-                                                <td class="text-center" onclick="javascript : return confirm('Anda yakin menghapus data ini ?')"> <?php echo anchor('appointment/delete/' . $agt->kodebooking, '<div class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></div>') ?></td>
+                                            <td><?php echo $agt->KODE_BOOKING; ?></td>
+                                            <td><?php echo $agt->PASIEN; ?></td>
+                                            <td><?php echo $agt->NO_RM; ?></td>
+                                            <td class="text-capitalize"><?php echo $agt->DPJP; ?></td>
+                                            <td class="text-truncate"><?php echo $agt->JADWAL; ?></td>
+                                            <td><?php echo $agt->NO_ANTREAN; ?></td>
+                                            <td class="text-truncate"><?php echo date('d-m-Y H:i', $agt->ESTIMASI_DILAYANI); ?></td>
+                                            <td><?php echo $agt->NO_REFERENSI ?></td>
+                                            <td><?php echo $agt->REGISTERED; ?></td>
+                                            <?php if ($agt->REGISTERED == 'N') { ?>
+                                                <td class="text-center" onclick="javascript : return confirm('Anda yakin menghapus data ini ?')"> <?php echo anchor('appointment/delete/' . $agt->KODE_BOOKING, '<div class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></div>') ?></td>
                                             <?php } else { ?>
                                                 <td>&nbsp;</td>
                                             <?php } ?>
