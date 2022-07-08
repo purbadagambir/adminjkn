@@ -85,10 +85,10 @@ defined('EXIT__AUTO_MIN')      or define('EXIT__AUTO_MIN', 9); // lowest automat
 defined('EXIT__AUTO_MAX')      or define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 // Constatanta url
-define('ANTREAN_WS', 'https://apijkn.bpjs-kesehatan.go.id/antreanrs/'); // LIVE
-//define('ANTREAN_WS', 'https://apijkn-dev.bpjs-kesehatan.go.id/antreanrs_dev/'); // DEV
+// define('ANTREAN_WS', 'https://apijkn.bpjs-kesehatan.go.id/antreanrs/'); // LIVE
+define('ANTREAN_WS', 'https://apijkn-dev.bpjs-kesehatan.go.id/antreanrs_dev/'); // DEV
 define('JKN_WS', 'http://localhost:8081/antrean/api/v2/');
-//define('JKN_WS', 'https://rsmbmc.cahayasolusindo.com/antrean/api/v2/');
+// define('JKN_WS', 'https://rsmettamedika.cahayasolusindo.com/api/v2/');
 //define('LZ_TOOL', 'http://localhost/tools/parse');
 define('LZ_TOOL', 'http://localhost:8081/tools/parse');
 

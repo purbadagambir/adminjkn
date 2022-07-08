@@ -126,7 +126,7 @@ class Appointment extends CI_controller
         if ($res->metadata->code == 200) {
             $this->session->set_flashdata(
                 'message',
-                '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success ! </strong>' . $res->metadata->message . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success ! </strong> Kode Booking : ' . $res->response->kodebooking . ' Nomor Antrean : ' . $res->response->nomorantrean . ' Estimasi Dilayanai: ' .  date('d-m-Y H:i', $res->response->estimasidilayani) . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
         	    <span aria-hidden="true">&times;</span>
         	  </button>
         	</div>'

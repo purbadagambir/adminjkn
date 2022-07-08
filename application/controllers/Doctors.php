@@ -212,8 +212,6 @@ class Doctors extends CI_controller
 			$startdate = strtotime('+1 day', $startdate);
 			$i++;
 		}
-
-
 		$this->session->set_flashdata(
 			'message',
 			'<div class="alert alert-secondary alert-dismissible fade show" role="alert"><strong>Information ! </strong> Looping time :' . $i . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">

@@ -27,6 +27,7 @@
                             <th>#</th>
                             <th>Kodebooking</th>
                             <th>No.Kartu</th>
+                            <th>Nama Pasien</th>
                             <th>RM</th>
                             <th>Dokter</th>
                             <th>Jadwal</th>
@@ -40,30 +41,29 @@
                     <tbody>
                         <?php
                         $data = json_decode($list);
-                        // var_dump($list);
+                        //var_dump($list);
                         if ($data->metadata->code == 200) {
                             if ($data->response != null) {
                                 $no = 1;
                                 foreach ($data->response as $agt) : ?>
-                                    <?php if ($agt->state == 1) { ?>
-                                        <tr class="text-truncate">
-                                            <td><?php echo $no++ ?></td>
-                                            <td><?php echo $agt->KODE_BOOKING; ?></td>
-                                            <td><?php echo $agt->PASIEN; ?></td>
-                                            <td><?php echo $agt->NO_RM; ?></td>
-                                            <td class="text-capitalize"><?php echo $agt->DPJP; ?></td>
-                                            <td class="text-truncate"><?php echo $agt->JADWAL; ?></td>
-                                            <td><?php echo $agt->NO_ANTREAN; ?></td>
-                                            <td class="text-truncate"><?php echo date('d-m-Y H:i', $agt->ESTIMASI_DILAYANI); ?></td>
-                                            <td><?php echo $agt->NO_REFERENSI ?></td>
-                                            <td><?php echo $agt->REGISTERED; ?></td>
-                                            <?php if ($agt->REGISTERED == 'N') { ?>
-                                                <td class="text-center" onclick="javascript : return confirm('Anda yakin menghapus data ini ?')"> <?php echo anchor('appointment/delete/' . $agt->KODE_BOOKING, '<div class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></div>') ?></td>
-                                            <?php } else { ?>
-                                                <td>&nbsp;</td>
-                                            <?php } ?>
-                                        </tr>
-                                    <?php } ?>
+                                    <tr class="text-truncate text-sm">
+                                        <td><?php echo $no++ ?></td>
+                                        <td><?php echo $agt->KODE_BOOKING; ?></td>
+                                        <td><?php echo $agt->SOCIAL_NO; ?></td>
+                                        <td><?php echo $agt->PASIEN; ?></td>
+                                        <td><?php echo $agt->RM_NO; ?></td>
+                                        <td class="text-capitalize"><?php echo $agt->DPJP; ?></td>
+                                        <td class="text-truncate"><?php echo $agt->JADWAL; ?></td>
+                                        <td><?php echo $agt->NO_ANTREAN; ?></td>
+                                        <td class="text-truncate"><?php echo date('d-m-Y H:i', $agt->ESTIMASI_DILAYANI); ?></td>
+                                        <td><?php echo $agt->NO_REFERENSI ?></td>
+                                        <td><?php echo $agt->REGISTERED; ?></td>
+                                        <?php if ($agt->REGISTERED == 'N') { ?>
+                                            <td class="text-center" onclick="javascript : return confirm('Anda yakin menghapus data ini ?')"> <?php echo anchor('appointment/delete/' . $agt->KODE_BOOKING, '<div class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></div>') ?></td>
+                                        <?php } else { ?>
+                                            <td>&nbsp;</td>
+                                        <?php } ?>
+                                    </tr>
                         <?php endforeach;
                             }
                         } ?>

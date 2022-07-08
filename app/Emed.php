@@ -131,14 +131,14 @@ class Emed
             $metadata['message'] = 'Ok';
             $result = array(
                 'metadata' => $metadata,
-                'list' => $row
+                'response' => $row
             );
         } else {
             $metadata['code'] = 201;
             $metadata['message'] = 'No data Found';
             $result = array(
                 'metadata' => $metadata,
-                'list' => 'No Data found'
+                'response' => 'No Data found'
             );
         }
         return json_encode($result);
@@ -231,9 +231,7 @@ class Emed
     {
         $data = json_decode($param);
         $i = 0;
-
-        // var_dump($data);
-        //echo $data;
+        $tanggal = date('d-m-Y');
         foreach ($data->response as $value) :
             $i++;
             $sql = "SELECT KODE_DOKTER 
@@ -275,7 +273,7 @@ class Emed
                 $stmt->bindparam(10, $value->kapasitaspasien);
                 $stmt->bindparam(11, $value->kapasitaspasienjkn);
                 $stmt->bindparam(12, $value->kapasitaspasiennonjkn);
-                $stmt->bindparam(13, $value->createdate);
+                $stmt->bindparam(13, $tanggal);
                 $stmt->bindparam(14, $value->lastupdate);
                 $stmt->execute();
 
@@ -315,8 +313,13 @@ class Emed
                         $stmt_dokter->execute();
                         $row_dokter = $stmt_dokter->fetch();
 
-                        $sql = "INSERT INTO APPOINTMENTS (APPOINMENT_NO, APPOINTMENT_DATE, DOCTOR_NO, SEQUENCE_NO, KODE_BOOKING, JADWAL) 
-                                VALUES (:APPOINMENT_NO,:APPOINTMENT_DATE,:DOCTOR_NO,:SEQUENCE_NO,:KODE_BOOKING,:JADWAL) ";
+                        $sql_patient = "SELECT CONTACT_NO FROM PATIENTS WHERE SOCIAL_NO=?";
+                        $stmt_patient = $this->dbh->prepare($sql_patient);
+                        $stmt_patient->execute(array($appt->nopeserta));
+                        $row_patient = $stmt->fetch();
+
+                        $sql = "INSERT INTO APPOINTMENTS (APPOINMENT_NO, APPOINTMENT_DATE, DOCTOR_NO, SEQUENCE_NO, KODE_BOOKING, JADWAL, ESTIMASI_DILAYANI,PATIENT_NO,SOCIAL_NO) 
+                                VALUES (:APPOINMENT_NO,:APPOINTMENT_DATE,:DOCTOR_NO,:SEQUENCE_NO,:KODE_BOOKING,:JADWAL,:ESTIMASI_DILAYANI,:PATIENT_NO,:SOCIAL_NO) ";
                         try {
                             $tanggalperiksa = date('d-M-Y', $appt->tanggalperiksa);
                             $stmt = $this->dbh->prepare($sql);
@@ -326,10 +329,14 @@ class Emed
                             $stmt->bindValue(':SEQUENCE_NO', $appt->angkaantrean, PDO::PARAM_STR);
                             $stmt->bindValue(':KODE_BOOKING', $appt->kodebooking, PDO::PARAM_STR);
                             $stmt->bindValue(':JADWAL', $appt->jampraktek, PDO::PARAM_STR);
+                            $stmt->bindValue(':ESTIMASI_DILAYANI', $appt->estimasidilayani, PDO::PARAM_INT);
+                            $stmt->bindValue(':PATIENT_NO', $row_patient['CONTACT_NO'], PDO::PARAM_INT);
+                            $stmt->bindValue(':SOCIAL_NO', $appt->nopeserta, PDO::PARAM_INT);
+
                             $stmt->execute();
                         } catch (\Throwable $th) {
                             $metadata['code'] = 201;
-                            $metadata['message'] =  $th->getMessage();
+                            $metadata['message'] = 'Kode Booking : ' . $appt->kodebooking . $th->getMessage();
                             $result = array(
                                 'metadata' => $metadata,
                             );
