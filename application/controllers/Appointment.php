@@ -20,11 +20,23 @@ class Appointment extends CI_controller
         $this->load->view('templates/footer');
     }
 
+    public function suratKontrol()
+    {
+        $data['header'] = 'Surat Kontrol';
+        $data['list'] = $this->dbemed->SelectKontrol();
+        $this->load->view('templates/header', $data);
+        userRole();
+        $this->load->view('v_surat_kontrol');
+        $this->load->view('templates/footer');
+    }
+
     public function downloadAppointment()
     {
         $data = $this->loadService(JKN_WS . 'antrean/kodeppk', 'GET', $this->requestHeader(), '');
-        $result = $this->dbemed->insertAppointment($data);
+        // var_dump($data);
+        // return;
 
+        $result = $this->dbemed->insertAppointment($data);
         $res = json_decode($result);
         if ($res->metadata->code == 200) {
             $this->session->set_flashdata(
@@ -93,6 +105,7 @@ class Appointment extends CI_controller
 
     public function newAppointment($rm, $name, $social)
     {
+
         $param['rm'] = $rm;
         $param['name'] = str_replace('%20', ' ', $name);
         $param['social'] = $social;
@@ -118,6 +131,17 @@ class Appointment extends CI_controller
         $req['jampraktek'] = $this->input->post('jampraktek');
         $req['jeniskunjungan'] = '1';
         $req['nomorreferensi'] = $this->input->post('nomorreferensi');
+
+        if ($this->input->post('nomorkartu') == '' || $this->input->post('norm') == 'null') {
+            $this->session->set_flashdata(
+                'message',
+                '<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Gagal ! </strong>Nomor Kartu tidak boleh kosong <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>'
+            );
+            redirect('appointment');
+        }
 
         $reques_data = json_encode($req);
         $data = $this->loadService(JKN_WS . 'antrean/getAntreanRs', 'POST', $this->requestHeader(), $reques_data);
@@ -176,5 +200,27 @@ class Appointment extends CI_controller
             $this->newAppointment($this->input->post('norm'), $this->input->post('namapeserta'), $this->input->post('nomorkartu'));
         }
         return;
+    }
+
+    public function sendAlertKontrol()
+    {
+        $pesan = "";
+        $pesan .= "Yth. Ibu/bpk SUMANRO TAMPUBOLON \n";
+        $pesan .= "Hallo, Salam Metta...";
+
+        $data['reference_no'] = '';
+        $data['nohp'] = '087780538379';
+        $data['pesan'] = $pesan;
+        // $data['pesan'] = '
+        // Yth. Ibu/bpk SUMANRO TAMPUBOLON 
+        // Hallo, Salam Metta... 
+        // Ingin menginformasikan jadwal kontrol anda tanggal : 03-10-2022 
+        // Nama Dokter : dr. Andy Luman, M.Ked(PD), Sp.PD 
+        // Ditunggu kedatangannya di RS. METTA MEDIKA II 
+        // Poliklinik :  *PENYAKIT DALAM*
+        // Terimakasih Salam sehat selalu.
+        // ';
+        $response =  $this->sendMessage(json_encode($data));
+        var_dump($response);
     }
 }

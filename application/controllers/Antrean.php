@@ -13,9 +13,10 @@ class Antrean extends CI_Controller
 
     public function index()
     {
-        $this->load->view('templates/header');
-        $this->load->view('antrean/topbar');
-        $this->load->view('antrean/v_client');
+        $data['header'] = 'Appointment';
+        $this->load->view('templates/header', $data);
+        userRole();
+        $this->load->view('v_pasien_jkn');
     }
 
     public function insert()
@@ -144,5 +145,13 @@ class Antrean extends CI_Controller
         userRole();
         $this->load->view('v_task_info', $data);
         $this->load->view('templates/footer');
+    }
+
+    public function mobileJKN()
+    {
+        $data['awal'] = $this->input->post('awal');
+        $data['akhir'] = $this->input->post('akhir');
+        echo  $this->dbemed->selectPatientJKN(json_encode($data));
+        //echo json_encode($data);
     }
 }

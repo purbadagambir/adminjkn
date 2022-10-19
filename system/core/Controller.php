@@ -326,4 +326,33 @@ class CI_Controller
 		curl_close($ch);
 		return $response;
 	}
+
+	public function sendMessage($data = null)
+	{
+		$value =  json_decode($data);
+
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, GATEWAY);
+		curl_setopt($curl, CURLOPT_HEADER, 0);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+		curl_setopt($curl, CURLOPT_TIMEOUT, 0); // batas waktu response
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($curl, CURLOPT_POST, 1);
+
+		$data_post = [
+			'id_device' => ID_DEVICE,
+			'api-key' => API_KEY,
+			'no_hp'   => $value->nohp,
+			'pesan'   => $value->pesan
+		];
+
+		curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data_post));
+		curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+		$response = curl_exec($curl);
+		curl_close($curl);
+		return $response;
+	}
 }

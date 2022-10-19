@@ -17,25 +17,24 @@
         </div>
     </div>
     <div class="card shadow mb-4">
-        <div class="card-header bg-gray-500 py-3">
+        <div class="card-header bg-success py-3">
         </div>
         <div class="card-body">
             <div class="table-responsive" id="printlayout">
-                <table id="datatable" class="table table-striped table-sm table-hover" style="width:100%">
+                <table id="datatable" class="table table-striped table-sm table-hover text-xs" style="width:100%">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Kodebooking</th>
                             <th>No.Kartu</th>
-                            <th>Nama Pasien</th>
                             <th>RM</th>
+                            <th>Nama Pasien</th>
                             <th>Dokter</th>
                             <th>Jadwal</th>
                             <th>Antrean</th>
                             <th>Estimasi Pelayanan</th>
                             <th>Ref.</th>
-                            <th>Reg.</th>
-                            <th></th>
+                            <th>JKN</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,26 +42,21 @@
                         $data = json_decode($list);
                         //var_dump($list);
                         if ($data->metadata->code == 200) {
-                            if ($data->response != null) {
+                            if ($data->list != null) {
                                 $no = 1;
-                                foreach ($data->response as $agt) : ?>
-                                    <tr class="text-truncate text-sm">
+                                foreach ($data->list as $agt) : ?>
+                                    <tr class="text-truncate text-xs">
                                         <td><?php echo $no++ ?></td>
-                                        <td><?php echo $agt->KODE_BOOKING; ?></td>
+                                        <td><?php echo $agt->APPOINMENT_NO; ?></td>
                                         <td><?php echo $agt->SOCIAL_NO; ?></td>
-                                        <td><?php echo $agt->PASIEN; ?></td>
                                         <td><?php echo $agt->RM_NO; ?></td>
-                                        <td class="text-capitalize"><?php echo $agt->DPJP; ?></td>
+                                        <td><?php echo $agt->NAMA_PASIEN; ?></td>
+                                        <td class="text-capitalize"><?php echo $agt->NAMA_DPJP; ?></td>
                                         <td class="text-truncate"><?php echo $agt->JADWAL; ?></td>
-                                        <td><?php echo $agt->NO_ANTREAN; ?></td>
+                                        <td><?php echo $agt->INISIAL_ANTRIAN . $agt->SEQUENCE_NO; ?></td>
                                         <td class="text-truncate"><?php echo date('d-m-Y H:i', $agt->ESTIMASI_DILAYANI); ?></td>
-                                        <td><?php echo $agt->NOTE ?></td>
-                                        <td><?php echo $agt->REGISTERED; ?></td>
-                                        <?php if ($agt->REGISTERED == 'N') { ?>
-                                            <td class="text-center" onclick="javascript : return confirm('Anda yakin menghapus data ini ?')"> <?php echo anchor('appointment/delete/' . $agt->KODE_BOOKING, '<div class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></div>') ?></td>
-                                        <?php } else { ?>
-                                            <td>&nbsp;</td>
-                                        <?php } ?>
+                                        <td><?php echo $agt->NO_REFERENSI ?></td>
+                                        <td class="text-center" onclick="javascript : return confirm('Anda yakin menghapus data ini ?')"> <?php echo anchor('appointment/delete/' . $agt->APPOINMENT_NO, '<div class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></div>') ?></td>
                                     </tr>
                         <?php endforeach;
                             }
@@ -72,4 +66,3 @@
             </div>
         </div>
     </div>
-</div>

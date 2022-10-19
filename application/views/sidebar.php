@@ -42,9 +42,9 @@
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">ANTREAN</h6>
             <a class="collapse-item" href="<?php echo base_url('appointment'); ?>">Appointment</a>
-            <a class="collapse-item" href="<?php echo base_url('appointment/suratKontrol'); ?>">Kontrol</a>
             <a class="collapse-item" href="<?php echo base_url('medicalrecords'); ?>">Data No RM</a>
             <a class="collapse-item" href="<?php echo base_url('pasien'); ?>">Data Pasien Baru</a>
+			 <a class="collapse-item" href="<?php echo base_url('medicalrecords/wsHeader'); ?>">Header WS</a>
           </div>
         </div>
       </li>
@@ -88,7 +88,6 @@
             <a class="collapse-item" href="<?php echo base_url('dashboard/sendingstatus'); ?>">Sending Status</a>
             <a class="collapse-item" href="<?php echo base_url('dashboard/waktuTungguByHari'); ?>">Performa Per Tanggal</a>
             <a class="collapse-item" href="<?php echo base_url('dashboard/waktutunggu'); ?>">Performa Per Bulan</a>
-            <a class="collapse-item" href="<?php echo base_url('antrean'); ?>">Pasien Mobile JKN</a>
           </div>
         </div>
       </li>
@@ -124,7 +123,7 @@
             <i class="fa fa-bars"></i>
           </button>
 
-          <a class="navbar-brand text-sm" href="<?= base_url('dashboard'); ?>">
+          <a class="navbar-brand" href="<?= base_url('dashboard'); ?>">
             <img src="<?= base_url('assets') . '/img/logo.png' ?>" width="30" height="30" class="d-inline-block align-top rounded" alt="">
             <small><?= PPK . ' - ' . RS;  ?></small>
           </a>

@@ -23,7 +23,6 @@
                 <?php
                 // var_dump($reqheader);
                 $operasi = json_decode($list);
-                var_dump($list);
                 if ($operasi->metadata->code === 200) {
                     foreach ($operasi->response->list as $value) : ?>
                         <div class="card ml-1 mb-1">
@@ -41,7 +40,7 @@
                                         <button class="btn btn-sm btn-danger btn-batal" title=" Batal" data-kodebooking="<?= $value->kodebooking; ?>"><i class="fa fa-trash"></i></button>
                                     </div>
                                     <div class="col-auto">
-                                        <i class="fas fa-procedures fa-2x text-danger" title="<?= $value->namapeserta ?>"></i>
+                                        <i class="fas fa-procedures fa-2x text-danger"></i>
                                     </div>
                                 </div>
                             </div>

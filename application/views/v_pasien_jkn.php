@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-1">
-        <h3 class="h5 mb-0 text-gray-900"><i class="fa fa-list"></i> List Task Antrean Per Tanggal</h3>
+        <h3 class="h5 mb-0 text-gray-900"><i class="fa fa-list"></i> List Pasien MOBILE JKN</h3>
         <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm"><i class="fas fa-angle-left fa-sm text-white-50"></i> Back</a>
     </div>
     <hr>
@@ -14,14 +14,10 @@
             <form action="#">
                 <div class="row">
                     <div class="col-3">
-                        <input type="date" class="form-control form-control-sm" name="tanggal" id="tanggal">
+                        <input type="date" class="form-control form-control-sm" name="awal" id="awal">
                     </div>
-                    <div class="col">
-                        <select name="waktu" class="form-control form-control-sm" id="waktu">
-                            <option value="0" selected>Pilih Nama Task Waktu</option>
-                            <option value="server">Waktu dicatat oleh server BPJS Kesehatan </option>
-                            <option value="rs">Waktu dicatat oleh server RS</option>
-                        </select>
+                    <div class="col-3">
+                        <input type="date" class="form-control form-control-sm" name="akhir" id="akhir">
                     </div>
                     <div class="col-2">
                         <button type="button" class="btn btn-sm btn-secondary" id="btn-view"><i class="fa fa-eye"></i> View</button>
@@ -35,8 +31,28 @@
         <div class="card-header bg-success py-3">
         </div>
         <div class="card-body">
-            <div class="row" id="perform">
+            <div class="table-responsive">
+                <table id="datatable" class="table table-striped table-sm table-hover" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Booking</th>
+                            <th>No.Kartu</th>
+                            <th>Nama Pasien</th>
+                            <th>RM</th>
+                            <th>Alamat</th>
+                            <th>No HP</th>
+                            <th>Dokter</th>
+                            <th>Jadwal</th>
+                            <th>Jam Masuk</th>
+                            <th>Jam Pulang</th>
+                            <th>Lama Pelayanan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mobilejkn">
 
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -152,6 +168,12 @@
 <!-- Custom scripts for all pages-->
 <script src="<?php echo base_url('assets'); ?>/js/sb-admin-2.min.js"></script>
 
+<!-- Data Table -->
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/dataTables.buttons.min.js"></script>
+<script src="<?php echo base_url('assets'); ?>/vendor/datatables/buttons.flash.min.js"></script>
+
 
 <script>
     $(document).ready(function() {
@@ -159,74 +181,46 @@
 
         $('#btn-view').click(function() {
             $('.loader').show();
-            let waktu = $('#waktu').val();
-            let tanggal = $('#tanggal').val();
+            let awal = $('#awal').val();
+            let akhir = $('#akhir').val();
             let tdata = '';
             let x = 0;
-			let total = 0;
+            let total = 0;
+            let selisih = (n) => `0${n / 60 ^ 0}`.slice(-2) + ':' + ('0' + n % 60).slice(-2)
 
             $.ajax({
                 type: 'post',
                 data: {
-                    waktu: waktu,
-                    tanggal: tanggal
+                    awal: awal,
+                    akhir: akhir
                 },
-                url: '<?= base_url('dashboard/waktuTungguByDate'); ?>',
+                url: '<?= base_url('antrean/mobileJKN'); ?>',
                 dataType: 'json',
                 success: function(data) {
                     console.log(data);
-                    // let second = new Date(1800 * 1000).toISOString().substr(14, 5);
-                    // alert(second);
                     if (data.metadata.code == 200) {
-                        for (let i = 0; i < data.response.list.length; i++) {
-							total = data.response.list[i].avg_waktu_task1 + data.response.list[i].avg_waktu_task2+
-							data.response.list[i].avg_waktu_task3+data.response.list[i].avg_waktu_task4+data.response.list[i].avg_waktu_task5+
-							data.response.list[i].avg_waktu_task6;
+                        for (let i = 0; i < data.response.length; i++) {
                             x++;
-                            tdata += '<div class="col-xl-3 col-md-6 mb-4">' +
-                                '<div class="card shadow h-100">' +
-                                '<div class="card-header bg-info"></div>' +
-                                '<div class="card-body bg-light">' +
-                                '<p class="text-sm font-weight-bold text-primary text-uppercase mb-1"> <i class="fas fa-home"></i> ' + data.response.list[i].namapoli + '</p>' +
-                                '<div class="row no-gutters align-items-center">' +
-                                '<table class="table table-sm">' +
-                                '<thead>' +
-                                '<tr>' +
-                                '<td colspan=2 class="bg-gray-200 text-center"> Performa</td>' +
-                                '</tr>' +
-                                '</thead>' +
-                                '<tbody class="text-sm">' +
-                                '<tr class="text-sm">' +
-                                '<td> <i class="fas fa-users"></i> Total Antrean</td>' +
-                                '<td> ' + data.response.list[i].jumlah_antrean + '</td>' +
-                                '</tr>' +
-                                '<tr>' +
-                                '<td> <i class="fas fa-registered"></i> Pendaftaran</td>' +
-                                '<td> ' + new Date(data.response.list[i].avg_waktu_task1 * 1000).toISOString().substr(11, 8) + '</td>' +
-                                '</tr>' +
-                                '<tr>' +
-                                '<td><i class="fas fa-home"></i>  Poliklinik</td>' +
-                                '<td> ' + new Date(data.response.list[i].avg_waktu_task3 * 1000).toISOString().substr(11, 8) + '</td>' +
-                                '</tr>' +
-                                '<tr>' +
-                                '<td><i class="fas fa-pills"></i>  Farmasi</td>' +
-                                '<td> ' + new Date(data.response.list[i].avg_waktu_task6 * 1000).toISOString().substr(11, 8) + '</td>' +
-                                '</tr>' +
-								'<td><i class="fas fa-check"></i>  Total</td>' +
-                                '<td> ' + new Date(total * 1000).toISOString().substr(11, 8) + '</td>' +
-                                '</tr>' +
-                                '</tbody>' +
-                                '</table>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>' +
-                                '</div>';
+                            tdata += '<tr>' +
+                                '<td>' + x + '</td>' +
+                                '<td>' + data.response[i].APPOINMENT_NO + '</td>' +
+                                '<td>' + data.response[i].SOCIAL_NO + '</td>' +
+                                '<td>' + data.response[i].NAME + '</td>' +
+                                '<td>' + data.response[i].RM_NO + '</td>' +
+                                '<td>' + data.response[i].ADDRESS1 + '</td>' +
+                                '<td>' + data.response[i].PHONE_MOBILE1 + '</td>' +
+                                '<td>' + data.response[i].DPJP + '</td>' +
+                                '<td>' + data.response[i].JADWAL + '</td>' +
+                                '<td>' + data.response[i].JAM_MASUK + '</td>' +
+                                '<td>' + data.response[i].JAM_PULANG + '</td>' +
+                                '<td>' + selisih(data.response[i].SELISIH) + '</td>' +
+                                '</tr>';
                         }
                     } else {
-                        tdata = '<p class="text-center">No data found</p>';
+                        tdata = '<tr><td colspan=12 class="text-center">' + data.metadata.message + '</td></tr>';
                     }
-                    $('#perform').html(tdata);
+                    $('#mobilejkn').html(tdata);
+                    // $('#datatable').DataTable().fnDestroy()
                 }
             });
             $('.loader').hide();

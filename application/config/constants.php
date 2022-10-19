@@ -85,19 +85,23 @@ defined('EXIT__AUTO_MIN')      or define('EXIT__AUTO_MIN', 9); // lowest automat
 defined('EXIT__AUTO_MAX')      or define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 // Constatanta url
-// define('ANTREAN_WS', 'https://apijkn.bpjs-kesehatan.go.id/antreanrs/'); // LIVE
-define('ANTREAN_WS', 'https://apijkn-dev.bpjs-kesehatan.go.id/antreanrs_dev/'); // DEV
-define('JKN_WS', 'http://localhost:8081/antrean/api/v2/');
+define('ANTREAN_WS', 'https://apijkn.bpjs-kesehatan.go.id/antreanrs/'); // LIVE
+//define('ANTREAN_WS', 'https://apijkn-dev.bpjs-kesehatan.go.id/antreanrs_dev/'); // DEV
+define('JKN_WS', 'https://rsalfuadi.enzsoft.com/api/v2/');
 // define('JKN_WS', 'https://rsmettamedika.cahayasolusindo.com/api/v2/');
 //define('LZ_TOOL', 'http://localhost/tools/parse');
 define('LZ_TOOL', 'http://localhost:8081/tools/parse');
 
 // JKN API user registered
-define('USERNAME', '0034R005');
-define('PASWWORD', 'M2RhMTk3');
-define('PPK', '0034R005');
-define('RS', 'RS. METTA MEDIKA II');
+define('USERNAME', '0039R010');
+define('PASWWORD', 'ZGM3OWQy');
+define('PPK', '0039R010');
+define('RS', 'RS. ALFUADI');
 
-define('CONST_ID', '5772');
-define('SECREET_KEY', 'NG5HNTVCOTAzMA==');
-define('USER_KEY', '10d6a24ab4ec90d3a81ad0f3f7180a2e');
+define('CONST_ID', '19140');
+define('SECREET_KEY', 'Mm1OOTAwRDJCRQ==');
+define('USER_KEY', '4d2153cd9f8197b80b4a2ed6318b6fb3');
+
+define('ID_DEVICE', '7988');
+define('GATEWAY', 'https://api.watsap.id/send-message');
+define('API_KEY', 'efa52a5956e2a28363430a7fc2f2bf1057f8235d');

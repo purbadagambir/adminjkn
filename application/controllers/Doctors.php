@@ -35,38 +35,71 @@ class Doctors extends CI_controller
 	public function synToEmed($kodedokter)
 	{
 		// jadwal($id, $ppk)
-		$jadwal = $this->loadService(JKN_WS . 'dokter/jadwal/' . $kodedokter . '/' . $this->session->userdata('ppk'), 'GET', $this->requestHeader(), '');
-		// echo $jadwal;
-		try {
-			$jadwalemed = json_decode($this->dbemed->insertBPJS_DPJP_SCHEDULES($jadwal));
-			if ($jadwalemed->metadata->code == 200) {
-				$this->session->set_flashdata(
-					'message',
-					'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Sukses ! </strong> Data berhasil di sinkronisasi <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		$jadwal = json_decode($this->loadService(JKN_WS . 'dokter/jadwal/' . $kodedokter . '/' . $this->session->userdata('ppk'), 'GET', $this->requestHeader(), ''));
+		if ($jadwal->metadata->code == 200) {
+			try {
+				$jadwalemed = json_decode($this->dbemed->insertBPJS_DPJP_SCHEDULES($jadwal));
+
+				if ($jadwalemed->metadata->code == 200) {
+					$this->session->set_flashdata(
+						'message',
+						'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Sukses ! </strong> Data berhasil di sinkronisasi <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				  </button>
 				</div>'
-				);
-			} else {
-				$this->session->set_flashdata(
-					'message',
-					'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Gagal ! </strong> ' . $jadwalemed->metadata->message . ' <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					);
+				} else {
+					$this->session->set_flashdata(
+						'message',
+						'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Gagal ! </strong> ' . $jadwalemed->metadata->message . ' <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				  </button>
 				</div>'
-				);
-			}
-		} catch (\Throwable $th) {
-			$this->session->set_flashdata(
-				'message',
-				'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Gagal ! </strong>' . $th->getMessage() . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					);
+				}
+			} catch (\Throwable $th) {
+				$this->session->set_flashdata(
+					'message',
+					'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Gagal ! </strong>' . $th->getMessage() . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
         	    <span aria-hidden="true">&times;</span>
         	  </button>
         	</div>'
+				);
+			}
+		} else {
+			$this->session->set_flashdata(
+				'message',
+				'<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Gagal ! </strong> Ws RS : ' . $jadwal->metadata->message . ' <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>'
 			);
 		}
 
 		redirect('doctors/jadwal/' . $kodedokter);
+	}
+
+	public function synJadwalByPoli($kodepoli)
+	{
+		#getJadwalByPoli($kodepoli);
+		$jadwal = json_decode($this->loadService(JKN_WS . 'dokter/getJadwalByPoli/' . $kodepoli, 'GET', $this->requestHeader(), ''));
+		if ($jadwal->metadata->code == 200) {
+			try {
+				$this->dbemed->insertBPJS_DPJP_SCHEDULES($jadwal);
+				$metadata['code'] = 201;
+				$metadata['message'] = 'Sync to EMed SUKSES';
+				$response = json_encode($metadata);
+			} catch (\Throwable $th) {
+				$metadata['code'] = 201;
+				$metadata['message'] = 'Sync to EMed GAGAL';
+				$response = json_encode($metadata);
+			}
+		} else {
+			$metadata['code'] = 201;
+			$metadata['message'] = 'WS RS : ' . $jadwal->metadata->message;
+			$response = json_encode($metadata);
+		}
+		return $response;
 	}
 
 	public function downloadJadwal()
@@ -75,6 +108,9 @@ class Doctors extends CI_controller
 		$tanggal = $this->input->post('tanggal');
 		# getJadwalHfis($kodepoli, $tanggal)
 		$response = $this->loadService(JKN_WS . 'dokter/getJadwalHfis/' . $kodepoli . '/' . $tanggal, 'GET', $this->requestHeader(), '');
+
+		var_dump($response);
+		return;
 
 		$res = json_decode($response);
 		if ($res->metadata->code == 200) {
@@ -98,7 +134,7 @@ class Doctors extends CI_controller
         	</div>'
 			);
 		}
-		redirect('doctors');
+		//redirect('doctors');
 	}
 
 	public function addToEmed($kodedokter)
@@ -200,11 +236,10 @@ class Doctors extends CI_controller
 		$startdate = strtotime($this->input->post('tanggal'));
 		$endate = strtotime("+6 days", $startdate);
 		$i = 0;
-		while ($startdate < $endate) {
+		while ($startdate <= $endate) {
 			$date = date('Y-m-d', $startdate);
 			$host = ANTREAN_WS . 'jadwaldokter/kodepoli/' . $kodepoli . '/tanggal/' . $date;
 			$response = $this->connectBPJS('GET', $host, '');
-			// var_dump($response);
 			$data = json_decode($response);
 			if ($data->metadata->code == 200) {
 				$this->loadService(JKN_WS . 'dokter/insertJadwalHfis', 'POST', $this->requestHeader(), $response);
@@ -212,13 +247,41 @@ class Doctors extends CI_controller
 			$startdate = strtotime('+1 day', $startdate);
 			$i++;
 		}
+		$result  = json_decode($this->synJadwalByPoli($kodepoli));
 		$this->session->set_flashdata(
 			'message',
-			'<div class="alert alert-secondary alert-dismissible fade show" role="alert"><strong>Information ! </strong> Looping time :' . $i . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			'<div class="alert alert-secondary alert-dismissible fade show" role="alert"><strong>Information ! </strong> Looping time :' . $result->metadata->message . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 		  </button>
 		</div>'
 		);
 		redirect('doctors');
+	}
+
+	public function deleteJadwal($dpjp, $jadwal)
+	{
+		$response = json_decode($this->dbemed->deleteJadwal($dpjp, $jadwal));
+		if ($response->metadata->code == 200) {
+			$host = json_decode($this->loadService(JKN_WS . 'dokter/deleteJadwal/' . $dpjp . '/' . $jadwal, 'GET', $this->requestHeader(), ''));
+
+			if ($host->metadata->code == 200) {
+				$this->session->set_flashdata(
+					'message',
+					'<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>Success ! </strong>' . $host->metadata->message . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>'
+				);
+			} else {
+				$this->session->set_flashdata(
+					'message',
+					'<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>Fail ! </strong> Message : ' . $host->metadata->message . '<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        	    <span aria-hidden="true">&times;</span>
+        	  </button>
+        	</div>'
+				);
+			}
+		}
+		redirect('doctors/jadwal/' . $dpjp);
 	}
 }

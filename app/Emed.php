@@ -1,5 +1,7 @@
 <?php
 
+use phpDocumentor\Reflection\Types\Array_;
+
 class Emed
 {
     private $dbh;
@@ -12,7 +14,7 @@ class Emed
     function __construct()
     {
         $tns = '(DESCRIPTION =
-                 (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.8.126)(PORT = 1521))
+                 (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.8.3)(PORT = 1521))
                      (CONNECT_DATA =
                          (SERVER = DEDICATED)
                          (SERVICE_NAME = xePDB1)
@@ -122,7 +124,9 @@ class Emed
                                     WHERE A.SOCIAL_NO=B.SOCIAL_NO(+) AND
                                         A.DOCTOR_NO=C.CONTACT_NO AND
                                         C.CONTACT_NO=D.CONTACT_NO AND
-                                        TRUNC(A.APPOINTMENT_DATE) = TRUNC(SYSDATE)");
+                                        REGISTERED='N' AND
+                                        TRUNC(A.APPOINTMENT_DATE) BETWEEN TRUNC(SYSDATE) AND TRUNC(SYSDATE+2)
+                                    ORDER BY ESTIMASI_DILAYANI");
 
         $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -229,35 +233,25 @@ class Emed
 
     public function insertBPJS_DPJP_SCHEDULES($param)
     {
-        $data = json_decode($param);
+        $data = $param;
         $i = 0;
-        $tanggal = date('d-m-Y');
-        foreach ($data->response as $value) :
-            $i++;
-            $sql = "SELECT KODE_DOKTER 
-                    FROM BPJS_DPJP_SCHEDULES 
-                    WHERE KODE_DOKTER=:KODE_DOKTER AND 
-                          HARI=:HARI AND
-                          JADWAL=:JADWAL";
-            $stmt = $this->dbh->prepare($sql);
-            $stmt->bindparam(':KODE_DOKTER', $value->kodedokter, PDO::PARAM_INT);
-            $stmt->bindparam(':HARI', $value->hari, PDO::PARAM_INT);
-            $stmt->bindparam(':JADWAL', $value->jadwal, PDO::PARAM_STR);
-            $stmt->execute();
-            $row = $stmt->fetch();
+        $tanggal = strtotime(date('d-m-Y'));
+        $delete = 'N';
 
-            if (!is_null($row)) {
-                $sql_del = "DELETE BPJS_DPJP_SCHEDULES 
-                            WHERE KODE_DOKTER=:KODE_DOKTER AND 
-                                  HARI=:HARI";
-                $stmt = $this->dbh->prepare($sql_del);
-                $stmt->bindparam(':KODE_DOKTER', $value->kodedokter, PDO::PARAM_INT);
-                $stmt->bindparam(':HARI', $value->hari, PDO::PARAM_INT);
-                $stmt->bindparam(':JADWAL', $value->jadwal, PDO::PARAM_STR);
-                $stmt->execute();
+        foreach ($data->response as $value) :
+            # Delete Jadwal By Poli;
+            $i++;
+            if ($delete == 'N') {
+                $sqlDelete = "DELETE BPJS_DPJP_SCHEDULES WHERE KODE_POLI = ? ";
+                $stmt = $this->dbh->prepare($sqlDelete);
+                $stmt->execute(array($value->kodepoli));
+                if ($stmt) {
+                    $delete = 'Y';
+                }
             }
-            $sql_ins = "INSERT INTO BPJS_DPJP_SCHEDULES (KODE_DOKTER,NAMADOKTER,KODE_POLI,NAMAPOLI,HARI,JADWAL,JAMBUKA,JAMTUTUP,NAMAHARI,
-                                    KAPASITASPASIEN,KAPASITASPASIENJKN,KAPASITASPASIENNONJKN,CREATEDATE,LASTUPDATE)
+
+            $sql_ins = "INSERT INTO BPJS_DPJP_SCHEDULES (KODE_DOKTER, NAMADOKTER, KODE_POLI, NAMAPOLI, HARI, JADWAL, JAMBUKA, JAMTUTUP, NAMAHARI,
+                                    KAPASITASPASIEN, KAPASITASPASIENJKN, KAPASITASPASIENNONJKN, CREATEDATE, LASTUPDATE)
                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
             try {
                 $stmt = $this->dbh->prepare($sql_ins);
@@ -274,7 +268,7 @@ class Emed
                 $stmt->bindparam(11, $value->kapasitaspasienjkn);
                 $stmt->bindparam(12, $value->kapasitaspasiennonjkn);
                 $stmt->bindparam(13, $tanggal);
-                $stmt->bindparam(14, $value->lastupdate);
+                $stmt->bindparam(14, $tanggal);
                 $stmt->execute();
 
                 $metadata['code'] = 200;
@@ -282,12 +276,37 @@ class Emed
             } catch (\Throwable $th) {
                 $metadata['code'] = 201;
                 $metadata['message'] = $value->kodedokter . '-' .  $th->getMessage();
-                break;
             }
         endforeach;
-        $reponse['count'] = count($data->list);
+        $reponse['count'] = count($data->response);
         $reponse['inserted'] = $i;
         return json_encode(array('metadata' => $metadata, 'response' => $reponse));
+    }
+
+    public function deleteJadwal($dpjp, $jadwal)
+    {
+        $sql = " DELETE BPJS_DPJP_SCHEDULES 
+                        WHERE KODE_DOKTER=? AND 
+                              JADWAL=?";
+        try {
+            $stmt = $this->dbh->prepare($sql);
+            $stmt->execute(array($dpjp, $jadwal));
+
+            $metadata['code'] = 200;
+            $metadata['message'] =  'Delete Sukses';
+            $result = array(
+                'metadata' => $metadata,
+            );
+            $response = json_encode($result);
+        } catch (\Throwable $th) {
+            $metadata['code'] = 201;
+            $metadata['message'] = 'Kode DPJP : ' . $dpjp . '-' . $th->getMessage();
+            $result = array(
+                'metadata' => $metadata,
+            );
+            $response = json_encode($result);
+        }
+        return $response;
     }
 
     public function insertAppointment($param)
@@ -313,27 +332,20 @@ class Emed
                         $stmt_dokter->execute();
                         $row_dokter = $stmt_dokter->fetch();
 
-                        $sql_patient = "SELECT CONTACT_NO FROM PATIENTS WHERE SOCIAL_NO=?";
+                        $sql_patient = "SELECT CONTACT_NO FROM PATIENTS WHERE RM_NO=?";
                         $stmt_patient = $this->dbh->prepare($sql_patient);
                         $stmt_patient->execute(array($appt->nopeserta));
                         $row_patient = $stmt->fetch();
 
-                        $sql = "INSERT INTO APPOINTMENTS (APPOINMENT_NO, APPOINTMENT_DATE, DOCTOR_NO, SEQUENCE_NO, KODE_BOOKING, JADWAL, ESTIMASI_DILAYANI,PATIENT_NO,SOCIAL_NO) 
-                                VALUES (:APPOINMENT_NO,:APPOINTMENT_DATE,:DOCTOR_NO,:SEQUENCE_NO,:KODE_BOOKING,:JADWAL,:ESTIMASI_DILAYANI,:PATIENT_NO,:SOCIAL_NO) ";
-                        try {
-                            $tanggalperiksa = date('d-M-Y', $appt->tanggalperiksa);
-                            $stmt = $this->dbh->prepare($sql);
-                            $stmt->bindValue(':APPOINMENT_NO', $appt->kodebooking, PDO::PARAM_STR);
-                            $stmt->bindValue(':APPOINTMENT_DATE', $tanggalperiksa, PDO::PARAM_STR);
-                            $stmt->bindValue(':DOCTOR_NO', $row_dokter['CONTACT_NO'], PDO::PARAM_INT);
-                            $stmt->bindValue(':SEQUENCE_NO', $appt->angkaantrean, PDO::PARAM_STR);
-                            $stmt->bindValue(':KODE_BOOKING', $appt->kodebooking, PDO::PARAM_STR);
-                            $stmt->bindValue(':JADWAL', $appt->jampraktek, PDO::PARAM_STR);
-                            $stmt->bindValue(':ESTIMASI_DILAYANI', $appt->estimasidilayani, PDO::PARAM_INT);
-                            $stmt->bindValue(':PATIENT_NO', $row_patient['CONTACT_NO'], PDO::PARAM_INT);
-                            $stmt->bindValue(':SOCIAL_NO', $appt->nopeserta, PDO::PARAM_INT);
+                        // $sql = "INSERT INTO APPOINTMENTS (APPOINMENT_NO, APPOINTMENT_DATE, DOCTOR_NO, SEQUENCE_NO, KODE_BOOKING, JADWAL, ESTIMASI_DILAYANI,PATIENT_NO,SOCIAL_NO, NOTE) 
+                        //         VALUES (:APPOINMENT_NO,:APPOINTMENT_DATE,:DOCTOR_NO,:SEQUENCE_NO,:KODE_BOOKING,:JADWAL,:ESTIMASI_DILAYANI,:PATIENT_NO,:SOCIAL_NO,:NOTE) ";
 
-                            $stmt->execute();
+                        $sql = "INSERT INTO APPOINTMENTS (APPOINMENT_NO, APPOINTMENT_DATE, DOCTOR_NO, SEQUENCE_NO, KODE_BOOKING, JADWAL, ESTIMASI_DILAYANI,PATIENT_NO,SOCIAL_NO, NOTE, TIPE_BOOKING) 
+                                 VALUES (?,TO_DATE(?,'dd-mm-yyyy hh24:mi:ss'),?,?,?,?,?,?,?,?,?) ";
+                        try {
+                            $tanggalperiksa = date('d-m-Y', $appt->tanggalperiksa);
+                            $stmt = $this->dbh->prepare($sql);
+                            $stmt->execute(array($appt->kodebooking, $tanggalperiksa, $row_dokter['CONTACT_NO'], $appt->angkaantrean, $appt->kodebooking, $appt->jampraktek, $appt->estimasidilayani, $row_patient['CONTACT_NO'], $appt->nopeserta, $appt->nomorreferensi, $appt->tipe_booking));
                         } catch (\Throwable $th) {
                             $metadata['code'] = 201;
                             $metadata['message'] = 'Kode Booking : ' . $appt->kodebooking . $th->getMessage();
@@ -509,6 +521,107 @@ class Emed
             $stmt->bindValue(7, $value->nik);
             $stmt->execute();
             return true;
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+    }
+
+    public function selectPatientJKN($data = null)
+    {
+        $periode = json_decode($data);
+        $awal = date('d-m-Y', strtotime($periode->awal));
+        $akhir = date('d-m-Y', strtotime($periode->akhir));
+
+        $stmt = $this->dbh->prepare("SELECT A.*,TO_CHAR(C.ORDER_DATE,'dd-mm-yy hh24:mi:ss') AS JAM_MASUK, TO_CHAR(B.END_DATE,'dd-mm-yy hh24:mi:ss') AS JAM_PULANG,  
+									D.*, E.NAME AS DPJP, ROUND((B.END_DATE - C.ORDER_DATE) * (24*60)) AS SELISIH
+									FROM APPOINTMENTS A, ANTREAN B, CASE_ORDERS C, V_PATIENTS D, DOCTORS E
+									WHERE A.APPOINMENT_NO=B.KODE_BOOKING AND
+										  B.ORDER_NO=C.ORDER_NO AND
+										  B.TASK_ID=5 AND
+										  TRUNC(APPOINTMENT_DATE) BETWEEN TO_DATE(:TGL1,'DD-MM-YYYY') AND TO_DATE(:TGL2,'DD-MM-YYYY') AND
+										  A.TIPE_BOOKING='JKN' AND
+										  C.PATIENT_NO=D.CONTACT_NO AND
+										  A.DOCTOR_NO=E.CONTACT_NO
+                                    ORDER BY C.ORDER_DATE");
+
+        $stmt->bindParam(':TGL1', $awal, PDO::PARAM_STR);
+        $stmt->bindParam(':TGL2', $akhir, PDO::PARAM_STR);
+        try {
+            $stmt->execute();
+            $row = $stmt->fetchAll();
+            if (count($row) > 0) {
+                $metadata['code'] = 200;
+                $metadata['message'] = 'Ok';
+                $result = array(
+                    'metadata' => $metadata,
+                    'response' => $row
+                );
+            } else {
+                $metadata['code'] = 201;
+                $metadata['message'] = 'No data found';
+                $result = array(
+                    'metadata' => $metadata,
+                    'response' => count($row) . ' No data found'
+                );
+            }
+            return json_encode($result);
+        } catch (\Throwable $th) {
+            $metadata['code'] = 500;
+            $metadata['message'] = 'Error';
+            $result = array(
+                'metadata' => $metadata,
+                'response' => 'Error : ' . $th
+            );
+            return json_encode($result);
+        }
+    }
+
+
+    public function SelectKontrol()
+    {
+        $stmt = $this->dbh->query("SELECT A.*,TELP
+                                    FROM BPJS_SURAT_KONTROL A, BPJS_PESERTA C
+                                    WHERE A.NO_KARTU=C.NO_KARTU(+) AND
+                                          A.TGL_RENCANA_KONTROL > SYSDATE
+                                    ORDER BY A.TGL_RENCANA_KONTROL, NAMA_DOKTER");
+
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($row) > 0) {
+            $metadata['code'] = 200;
+            $metadata['message'] = 'Ok';
+            $result = array(
+                'metadata' => $metadata,
+                'response' => $row
+            );
+        } else {
+            $metadata['code'] = 201;
+            $metadata['message'] = 'No data Found';
+            $result = array(
+                'metadata' => $metadata,
+                'response' => 'No Data found'
+            );
+        }
+        return json_encode($result);
+    }
+
+    public function InsertWaMessage($data = null)
+    {
+        $value = json_decode($data);
+
+        try {
+
+            $insert_contact = "INSERT INTO WA_MESSAGE_HISTORIES (MESSAGE_ID, REFERENCE_ID, WA_ID, MESSAGE_BODY, SEND_DATE, SEND_STATUS, MESSAGE_STATUS) VALUES
+                            (?,?,?,?,?,?,?)";
+            $stmt = $this->dbh->prepare($insert_contact);
+            $stmt->bindValue(1, '-1');
+            $stmt->bindValue(2, $value->reference_id);
+            $stmt->bindValue(3, $value->wa_id);
+            $stmt->bindValue(4, $value->message_body);
+            $stmt->bindValue(5, $value->send_date);
+            $stmt->bindValue(6, $value->send_status);
+            $stmt->bindValue(7, $value->message_status);
+            $stmt->execute();
         } catch (\Throwable $th) {
             return $th->getMessage();
         }

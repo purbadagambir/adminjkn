@@ -75,6 +75,7 @@
                             <th>Task 4</th>
                             <th>Task 5</th>
                             <th>Task 6</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody id="dashboard">
@@ -84,7 +85,14 @@
             </div>
         </div>
         <div class="card-footer">
-
+            <div class="row text-xs">
+                <div class="col">Task 1 : Waktu Tunggu Pendaftaran</div>
+                <div class="col">Task 2 : Waktu Pelayanan Pendaftaran</div>
+                <div class="col">Task 3 : Waktu Tunggu Poliklinik</div>
+                <div class="col">Task 4 : Waktu Layanan Poliklinik</div>
+                <div class="col">Task 5 : Waktu Tunggu Farmasi</div>
+                <div class="col">Task 6 : Waktu Layanan Farmasi</div>
+            </div>
         </div>
     </div>
 </div>
@@ -212,6 +220,7 @@
             let tahun = $('#tahun').val();
             let tdata = '';
             let x = 0;
+            let total = 0;
 
             $.ajax({
                 type: 'post',
@@ -229,6 +238,8 @@
                     if (data.metadata.code == 200) {
                         for (let i = 0; i < data.response.list.length; i++) {
                             x++;
+                            total = data.response.list[i].avg_waktu_task1 + data.response.list[i].avg_waktu_task2 +
+                                data.response.list[i].avg_waktu_task3 + data.response.list[i].avg_waktu_task4 + data.response.list[i].avg_waktu_task5 + data.response.list[i].avg_waktu_task6;
                             tdata += '<tr class="table-xs">' +
                                 '<td>' + x + '</td>' +
                                 '<td>' + data.response.list[i].tanggal + '</td>' +
@@ -240,6 +251,7 @@
                                 '<td>' + new Date(data.response.list[i].avg_waktu_task4 * 1000).toISOString().substr(11, 8) + '</td>' +
                                 '<td>' + new Date(data.response.list[i].avg_waktu_task5 * 1000).toISOString().substr(11, 8) + '</td>' +
                                 '<td>' + new Date(data.response.list[i].avg_waktu_task6 * 1000).toISOString().substr(11, 8) + '</td>' +
+                                '<td>' + new Date(total * 1000).toISOString().substr(11, 8) + '</td>' +
                                 '</tr>'
                         }
                     } else {

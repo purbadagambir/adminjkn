@@ -29,12 +29,13 @@
                             <th>Nama Poli</th>
                             <th>Tanggal Create</th>
                             <th>Tanggal Update</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $data = json_decode($list);
-                        // var_dump($list);
+                        //var_dump($data);
                         if ($data->metadata->code == 200) {
                             if ($data->response != null) {
                                 $no = 1;
@@ -48,6 +49,7 @@
                                         <td><?php echo $agt->namapoli; ?></td>
                                         <td><?php echo date('d-m-Y H:i:s', $agt->createdate); ?></td>
                                         <td><?php echo date('d-m-Y H:i:s', $agt->lastupdate); ?></td>
+                                        <td><a href="<?php echo base_url('doctors/deleteJadwal/') . $agt->kodedokter . '/' . $agt->jadwal; ?>" class="btn btn-sm btn-danger btn-delete" title="Delete"><i class="fa fa-trash"></i> </a></td>
                                     </tr>
                         <?php endforeach;
                             }

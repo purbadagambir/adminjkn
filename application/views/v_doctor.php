@@ -39,7 +39,7 @@
                                             if (($value->doctor_no) == 0) { ?>
                                                 <a href="<?= base_url('doctors/addToEMed/') . $value->kodedokter; ?>" class="btn btn-warning btn-sm" title="Add To E-Med"><i class="fa fa-plus"></i></a>
                                             <?php  }  ?>
-                                            <a href="<?= base_url('doctors/synToEmed/') . $value->kodedokter; ?>" class="btn btn-sm btn-secondary" title="Sync To E-Med"><i class="fa fa-upload"></i></a>
+                                            <!-- <a href="<?= base_url('doctors/synToEmed/') . $value->kodedokter; ?>" class="btn btn-sm btn-secondary" title="Sync To E-Med"><i class="fa fa-upload"></i></a> -->
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-user-md fa-3x text-gray-500"></i>

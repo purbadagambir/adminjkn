@@ -22,11 +22,18 @@
                                 <div class="col-sm mb-0 mb-sm-0">
                                     <label for="id" class="col-form-label">Pasien</label>
                                 </div>
-                                <div class="col-sm-3 mb-1 mb-sm-0">
+                                <div class="col-sm-2 mb-1 mb-sm-0">
                                     <input type="text" readonly class="form-control" name="norm" placeholder="norm" value="<?= $param['rm']; ?>">
-                                    <input type="text" hidden class="form-control" name="nomorkartu" placeholder="" value="<?= $param['social']; ?>">
+
                                 </div>
-                                <div class="col-sm-7">
+                                <div class="col-sm-3">
+                                    <input type="text" readonly required class="form-control" name="nomorkartu" placeholder="" value="<?php if ($param['social'] == 'null') {
+                                                                                                                                            echo "";
+                                                                                                                                        } else {
+                                                                                                                                            echo $param['social'];
+                                                                                                                                        } ?>">
+                                </div>
+                                <div class="col-sm-5">
                                     <input type="text" readonly class="form-control" placeholder="Name" name="namapeserta" value="<?= $param['name']; ?>">
                                 </div>
                             </div>
@@ -43,7 +50,7 @@
                                     <label for="id" class="col-form-label">Poliklinik</label>
                                 </div>
                                 <div class="col">
-                                    <select id="kodepoli" name="kodepoli" class="form-control">
+                                    <select id="kodepoli" name="kodepoli" class="form-control" required>
                                         <option selected>Pilih Poliklinik</option>
                                         <?php
                                         $list_poli = json_decode($poli);

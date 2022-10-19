@@ -84,7 +84,6 @@ class Polikliniks extends CI_controller
     {
         # getDataPoliHfis($ppk)
         $response = $this->loadService(JKN_WS . 'poliklinik/getDataPoliHfis/' . $this->session->userdata('ppk'), 'GET', $this->requestHeader(), '');
-
         $res = json_decode($response);
         if ($res->metadata->code == 200) {
             $this->session->set_flashdata(
@@ -103,7 +102,7 @@ class Polikliniks extends CI_controller
         	</div>'
             );
         }
-        redirect('polikliniks');
+        //redirect('polikliniks');
     }
 
     public function getDataPoliHfis($ppk = PPK)
@@ -145,6 +144,6 @@ class Polikliniks extends CI_controller
             </div>'
             );
         }
-        redirect('polikliniks');
+        //redirect('polikliniks');
     }
 }
